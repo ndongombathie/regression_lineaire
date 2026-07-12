@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regression linéaire</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100 flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/30 overflow-hidden">
+        <div class="grid md:grid-cols-[1.1fr_0.9fr]">
+            <div class="bg-gradient-to-br from-indigo-600 to-cyan-500 p-8 md:p-10 flex flex-col justify-between">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.3em] text-indigo-100/80">Prédiction</p>
+                    <h1 class="mt-3 text-3xl md:text-4xl font-semibold">Formulaire de prédiction automobile</h1>
+                    <p class="mt-4 text-sm md:text-base text-indigo-50/90 leading-relaxed">
+                        Entrez les caractéristiques du véhicule pour obtenir une estimation basée sur notre modèle de régression.
+                    </p>
+                </div>
+                <div>
+                    {% if prediction %}
+                        <p class="text-sm text-cyan-500">Votre prédiction est de {{ prediction }}</p>
+                    {% endif %}
+                </div>
+                <div class="mt-8 rounded-2xl bg-black/20 p-4 text-sm text-indigo-50/90">
+                    <p class="font-medium">Conseil</p>
+                    <p class="mt-2">Les valeurs doivent être renseignées avec précision pour améliorer la qualité de la prédiction.</p>
+                </div>
+            </div>
+
+            <div class="p-8 md:p-10">
+                <form class="space-y-5" action="{% url 'index' %}" method="post">
+                    {% csrf_token %}
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cylinders" class="block text-sm font-medium text-slate-200 mb-2">Cylinders</label>
+                            <input type="number" id="cylinders" name="cylinders" placeholder="Ex: 4" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                        <div>
+                            <label for="displacement" class="block text-sm font-medium text-slate-200 mb-2">Displacement</label>
+                            <input type="number" step="0.01" id="displacement" name="displacement" placeholder="Ex: 140.0" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="horsepower" class="block text-sm font-medium text-slate-200 mb-2">Horsepower</label>
+                            <input type="number" id="horsepower" name="horsepower" placeholder="Ex: 90" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-slate-200 mb-2">Weight</label>
+                            <input type="number" id="weight" name="weight" placeholder="Ex: 2500" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="acceleration" class="block text-sm font-medium text-slate-200 mb-2">Acceleration</label>
+                            <input type="number" step="0.1" id="acceleration" name="acceleration" placeholder="Ex: 15.5" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                        <div>
+                            <label for="model_year" class="block text-sm font-medium text-slate-200 mb-2">Model Year</label>
+                            <input type="number" id="model_year" name="model_year" placeholder="Ex: 81" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="origin" class="block text-sm font-medium text-slate-200 mb-2">Origin</label>
+                        <select id="origin" name="origin" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:bg-slate-900">
+                            <option value="">Sélectionner</option>
+                            <option value="1">1 - USA</option>
+                            <option value="2">2 - Europe</option>
+                            <option value="3">3 - Japan</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:opacity-90">
+                        Prédire
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
