@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from regression.views import index
+from regression.views import index, predict
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", index, name="index"),
+    path("predict/", predict, name="predict"),
 ]

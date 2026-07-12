@@ -1,85 +1,438 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regression linéaire</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Régression linéaire — Fiche technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;
+    --panel:#0d131c;
+    --panel-2:#0f1620;
+    --grid-line:rgba(94,234,212,0.05);
+    --blueprint:#16283b;
+    --border:rgba(148,178,199,0.16);
+    --border-strong:rgba(94,234,212,0.28);
+    --amber:#f2a93b;
+    --amber-dim:rgba(242,169,59,0.35);
+    --teal:#5eead4;
+    --teal-dim:rgba(94,234,212,0.35);
+    --text:#e7ecf2;
+    --muted:#7c8ca0;
+    --muted-2:#4d5c6e;
+    --danger:#e2593c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(94,234,212,0.06), transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(242,169,59,0.05), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+  }
+  .sheet{
+    width:100%;
+    max-width:1080px;
+    border:1px solid var(--border);
+    background:var(--panel);
+    position:relative;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,0.7);
+  }
+  /* corner brackets, technical-drawing style */
+  .sheet::before,.sheet::after,
+  .corner-br::before,.corner-br::after{
+    content:"";
+    position:absolute;
+    width:22px;height:22px;
+    border-color:var(--teal-dim);
+    border-style:solid;
+    opacity:0.9;
+  }
+  .sheet::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+  .sheet::after{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+  .corner-br{position:relative;}
+  .corner-br::before{bottom:-1px;left:-1px;top:auto;border-width:0 0 2px 2px;}
+  .corner-br::after{bottom:-1px;right:-1px;top:auto;border-width:0 2px 2px 0;}
+
+  .grid-wrap{
+    display:grid;
+    grid-template-columns:1.05fr 1.3fr;
+  }
+  @media (max-width:860px){
+    .grid-wrap{grid-template-columns:1fr;}
+  }
+
+  /* ---- LEFT: dashboard / gauge panel ---- */
+  .dash{
+    background:
+      repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 28px),
+      linear-gradient(160deg,#0c1119,#0a0d13 70%);
+    border-right:1px solid var(--border);
+    padding:40px 36px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.32em;
+    color:var(--teal);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    background:var(--teal);
+    box-shadow:0 0 8px var(--teal);
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:clamp(28px,3.4vw,36px);
+    letter-spacing:0.01em;
+    line-height:1.1;
+    margin:14px 0 8px;
+    text-transform:uppercase;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.6;
+    max-width:36ch;
+  }
+
+  .gauge-box{
+    margin-top:28px;
+    text-align:center;
+  }
+  .gauge-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    color:var(--muted-2);
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+  .gauge-readout{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--muted);
+    margin-top:-6px;
+    min-height:20px;
+    letter-spacing:0.02em;
+  }
+  .gauge-readout .val{color:var(--amber);font-size:22px;}
+
+  .note{
+    margin-top:28px;
+    border:1px solid var(--border);
+    border-left:2px solid var(--teal-dim);
+    background:rgba(94,234,212,0.03);
+    padding:14px 16px;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--muted);
+  }
+  .note b{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.14em;
+    font-size:10.5px;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:6px;
+  }
+
+  /* ---- RIGHT: spec form ---- */
+  .form-side{
+    padding:40px 36px;
+  }
+  .form-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.24em;
+    text-transform:uppercase;
+    color:var(--muted-2);
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid var(--border);
+    padding-bottom:12px;
+    margin-bottom:22px;
+  }
+  .form-title span:last-child{color:var(--teal);}
+
+  .field-row{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    gap:14px;
+    align-items:start;
+    padding:14px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .field-row:first-of-type{padding-top:0;}
+  .idx{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--muted-2);
+    padding-top:11px;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+    font-weight:500;
+  }
+  label .unit{
+    color:var(--muted-2);
+    text-transform:none;
+    letter-spacing:0;
+    font-size:11px;
+  }
+  input,select{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;
+    padding:11px 13px;
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  input::placeholder{color:var(--muted-2);}
+  input:focus,select:focus{
+    border-color:var(--teal);
+    background:#0b141c;
+  }
+  select{
+    background-image:linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size:5px 5px, 5px 5px;
+    background-repeat:no-repeat;
+  }
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+
+  .submit-row{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  button[type="submit"]{
+    flex:1;
+    background:var(--amber);
+    color:#1a1206;
+    border:none;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:15px 20px;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.2);
+  }
+  button[type="submit"]:hover{
+    background:#ffbb55;
+    box-shadow:0 8px 24px -8px rgba(242,169,59,0.55);
+  }
+  button[type="submit"]:active{transform:translateY(1px);}
+  .run-id{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted-2);
+    letter-spacing:0.06em;
+    white-space:nowrap;
+  }
+</style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100 flex items-center justify-center px-4 py-10">
-    <div class="w-full max-w-5xl rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/30 overflow-hidden">
-        <div class="grid md:grid-cols-[1.1fr_0.9fr]">
-            <div class="bg-gradient-to-br from-indigo-600 to-cyan-500 p-8 md:p-10 flex flex-col justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.3em] text-indigo-100/80">Prédiction</p>
-                    <h1 class="mt-3 text-3xl md:text-4xl font-semibold">Formulaire de prédiction automobile</h1>
-                    <p class="mt-4 text-sm md:text-base text-indigo-50/90 leading-relaxed">
-                        Entrez les caractéristiques du véhicule pour obtenir une estimation basée sur notre modèle de régression.
-                    </p>
-                </div>
-                <div>
-                    {% if prediction %}
-                        <p class="text-sm text-cyan-500">Votre prédiction est de {{ prediction }}</p>
-                    {% endif %}
-                </div>
-                <div class="mt-8 rounded-2xl bg-black/20 p-4 text-sm text-indigo-50/90">
-                    <p class="font-medium">Conseil</p>
-                    <p class="mt-2">Les valeurs doivent être renseignées avec précision pour améliorer la qualité de la prédiction.</p>
-                </div>
-            </div>
+<body>
 
-            <div class="p-8 md:p-10">
-                <form class="space-y-5" action="{% url 'index' %}" method="post">
-                    {% csrf_token %}
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="cylinders" class="block text-sm font-medium text-slate-200 mb-2">Cylinders</label>
-                            <input type="number" id="cylinders" name="cylinders" placeholder="Ex: 4" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                        <div>
-                            <label for="displacement" class="block text-sm font-medium text-slate-200 mb-2">Displacement</label>
-                            <input type="number" step="0.01" id="displacement" name="displacement" placeholder="Ex: 140.0" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                    </div>
+  <div class="sheet corner-br">
+    <div class="grid-wrap">
 
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="horsepower" class="block text-sm font-medium text-slate-200 mb-2">Horsepower</label>
-                            <input type="number" id="horsepower" name="horsepower" placeholder="Ex: 90" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                        <div>
-                            <label for="weight" class="block text-sm font-medium text-slate-200 mb-2">Weight</label>
-                            <input type="number" id="weight" name="weight" placeholder="Ex: 2500" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                    </div>
-
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="acceleration" class="block text-sm font-medium text-slate-200 mb-2">Acceleration</label>
-                            <input type="number" step="0.1" id="acceleration" name="acceleration" placeholder="Ex: 15.5" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                        <div>
-                            <label for="model_year" class="block text-sm font-medium text-slate-200 mb-2">Model Year</label>
-                            <input type="number" id="model_year" name="model_year" placeholder="Ex: 81" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none ring-0 transition focus:border-cyan-400 focus:bg-slate-900">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="origin" class="block text-sm font-medium text-slate-200 mb-2">Origin</label>
-                        <select id="origin" name="origin" class="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:bg-slate-900">
-                            <option value="">Sélectionner</option>
-                            <option value="1">1 - USA</option>
-                            <option value="2">2 - Europe</option>
-                            <option value="3">3 - Japan</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:opacity-90">
-                        Prédire
-                    </button>
-                </form>
-            </div>
+      <!-- LEFT: dashboard / gauge -->
+      <div class="dash">
+        <div>
+          <div class="eyebrow">Module d'estimation</div>
+          <h1>Consommation &amp;<br>efficacité — MPG</h1>
+          <p class="sub">Renseignez les caractéristiques techniques du véhicule pour obtenir une estimation issue du modèle de régression linéaire.</p>
         </div>
+
+        <div class="gauge-box">
+          <svg viewBox="0 0 300 190" width="100%" style="max-width:300px;">
+            <defs>
+              <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#e2593c"/>
+                <stop offset="45%" stop-color="#f2a93b"/>
+                <stop offset="100%" stop-color="#5eead4"/>
+              </linearGradient>
+            </defs>
+
+            <path d="M20,160 A130,130 0 0 1 280,160" fill="none" stroke="#16232f" stroke-width="14"/>
+            <path d="M20,160 A130,130 0 0 1 280,160" fill="none" stroke="url(#arcGradient)" stroke-width="3" stroke-dasharray="2 6" opacity="0.6"/>
+
+            <!-- ticks -->
+            <g stroke="#3a4a5c" stroke-width="2">
+              <line x1="20" y1="160" x2="33" y2="160"/>
+              <line x1="44.8" y1="83.6" x2="56.4" y2="88.4"/>
+              <line x1="109.8" y1="36.4" x2="115.3" y2="49.2"/>
+              <line x1="190.2" y1="36.4" x2="184.7" y2="49.2"/>
+              <line x1="255.2" y1="83.6" x2="243.6" y2="88.4"/>
+              <line x1="280" y1="160" x2="267" y2="160"/>
+            </g>
+            <g font-family="JetBrains Mono, monospace" font-size="10" fill="#5c6d81" text-anchor="middle">
+              <text x="20" y="178">0</text>
+              <text x="86" y="72">17</text>
+              <text x="150" y="26">33</text>
+              <text x="214" y="72">50</text>
+              <text x="280" y="178">MPG</text>
+            </g>
+
+            <g id="needle" style="transform-origin:150px 160px; transform:rotate(-90deg); transition:transform 1.3s cubic-bezier(.2,.9,.25,1.1);">
+              <line x1="150" y1="160" x2="150" y2="52" stroke="#f2a93b" stroke-width="3" stroke-linecap="round"/>
+              <line x1="150" y1="160" x2="150" y2="52" stroke="#f2a93b" stroke-width="3" stroke-linecap="round" opacity="0.35" filter="blur(3px)"/>
+            </g>
+            <circle cx="150" cy="160" r="7" fill="#0d131c" stroke="#f2a93b" stroke-width="2.5"/>
+          </svg>
+          <div class="gauge-label">Estimation du modèle</div>
+          <div class="gauge-readout" id="gauge-readout">— en attente de données —</div>
+        </div>
+
+        <div class="note">
+          <b>Note technique</b>
+          Les valeurs doivent être renseignées avec précision (unités SI/impériales indiquées) pour garantir la fiabilité de la prédiction.
+        </div>
+      </div>
+
+      <!-- RIGHT: spec sheet form -->
+      <div class="form-side">
+        <div class="form-title">
+          <span>Fiche véhicule / saisie</span>
+          <span>7 champs</span>
+        </div>
+
+        <form action="{% url 'predict' %}" method="post" id="predict-form"
+              data-prediction="{% if prediction %}{{ prediction }}{% endif %}">
+          {% csrf_token %}
+
+          <div class="two-col">
+            <div class="field-row">
+              <div class="idx">01</div>
+              <div>
+                <label for="cylinders">Cylinders</label>
+                <input type="number" required id="cylinders" name="cylinders" placeholder="Ex: 4">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="idx">02</div>
+              <div>
+                <label for="displacement">Displacement <span class="unit">(in³)</span></label>
+                <input type="number" required step="0.01" id="displacement" name="displacement" placeholder="Ex: 140.0">
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field-row">
+              <div class="idx">03</div>
+              <div>
+                <label for="horsepower">Horsepower</label>
+                <input type="number" required id="horsepower" name="horsepower" placeholder="Ex: 90">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="idx">04</div>
+              <div>
+                <label for="weight">Weight <span class="unit">(lbs)</span></label>
+                <input type="number" required id="weight" name="weight" placeholder="Ex: 2500">
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field-row">
+              <div class="idx">05</div>
+              <div>
+                <label for="acceleration">Acceleration <span class="unit">(0–60, s)</span></label>
+                <input type="number" step="0.1" id="acceleration" name="acceleration" placeholder="Ex: 15.5">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="idx">06</div>
+              <div>
+                <label for="model_year">Model year</label>
+                <input type="number" id="model_year" name="model_year" placeholder="Ex: 81">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row" style="grid-template-columns:34px 1fr;">
+            <div class="idx">07</div>
+            <div>
+              <label for="origin">Origin</label>
+              <select id="origin" name="origin">
+                <option value="">Sélectionner</option>
+                <option value="1">USA</option>
+                <option value="2">Europe</option>
+                <option value="3">Japan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="submit-row">
+            <button type="submit">Lancer la prédiction</button>
+          </div>
+        </form>
+      </div>
+
     </div>
+  </div>
+
+<script>
+  (function(){
+    var form = document.getElementById('predict-form');
+    var raw = form ? form.getAttribute('data-prediction') : '';
+    var needle = document.getElementById('needle');
+    var readout = document.getElementById('gauge-readout');
+    var value = parseFloat(raw);
+
+    if (!isNaN(value)) {
+      var clamped = Math.max(0, Math.min(50, value));
+      var angle = -90 + (clamped / 50) * 180;
+      requestAnimationFrame(function(){
+        needle.style.transform = 'rotate(' + angle + 'deg)';
+      });
+      readout.innerHTML = 'Efficacité estimée : <span class="val">' + value.toFixed(2) + '</span> MPG';
+    }
+  })();
+</script>
+
 </body>
 </html>
